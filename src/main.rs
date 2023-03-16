@@ -8,17 +8,20 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use qmos::println;
+use qmos::{print, println};
 mod panic;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    println!("Hello World{}", "!");
+    println!("Welcome to QMOS!");
+
+    qmos::init();
 
     #[cfg(test)]
     test_main();
 
-    loop {}
+    println!("Booted");
+    qmos::hlt_loop();
 }
 
 #[test_case]

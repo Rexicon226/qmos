@@ -15,13 +15,12 @@ fn panic(info: &PanicInfo) -> ! {
     } else {
         println!("PANIC: no location information available");
     }
-
-    loop {}
+    qmos::hlt_loop();
 }
 
 
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    qmos::test_panic_handler(info)
+    qmos::test_panic_handler(info);
 }
