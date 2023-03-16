@@ -1,6 +1,8 @@
 use core::panic::PanicInfo;
-use crate::println;
+
 use qmos::{exit_qemu, QemuExitCode, serial_println};
+
+use crate::println;
 
 #[cfg(not(test))]
 #[panic_handler]

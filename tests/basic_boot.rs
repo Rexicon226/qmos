@@ -5,6 +5,7 @@
 #![test_runner(qmos::test_runner)]
 
 use core::panic::PanicInfo;
+
 use qmos::println;
 
 #[no_mangle]

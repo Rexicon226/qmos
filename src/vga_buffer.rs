@@ -1,7 +1,8 @@
-use volatile::Volatile;
 use core::fmt;
+
 use lazy_static::lazy_static;
 use spin::Mutex;
+use volatile::Volatile;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -100,6 +101,37 @@ impl Writer {
         }
     }
 
+    pub fn backspace(&mut self) {
+        if self.column_position > 0 {
+            self.column_position -= 1;
+            self.write_byte(b' ');
+            self.column_position -= 1;
+        }
+    }
+
+    pub fn delete(&mut self) {
+        if self.column_position < BUFFER_WIDTH {
+            self.write_byte(b' ');
+        }
+    }
+
+    // handle arrow keys left right
+    pub fn move_cursor(&mut self, direction: &str) {
+        match direction {
+            "left" => {
+                if self.column_position > 0 {
+                    self.column_position -= 1;
+                }
+            },
+            "right" => {
+                if self.column_position < BUFFER_WIDTH {
+                    self.column_position += 1;
+                }
+            },
+            _ => {}
+        }
+    }
+
     pub fn write_string(&mut self, s: &str) {
         for byte in s.bytes() {
             match byte {
@@ -126,6 +158,16 @@ lazy_static! {
     });
 }
 
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    use core::fmt::Write;
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
+}
+
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
@@ -135,16 +177,6 @@ macro_rules! print {
 macro_rules! println {
     () => ($crate::print!("\n"));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
-}
-
-#[doc(hidden)]
-pub fn _print(args: fmt::Arguments) {
-    use core::fmt::Write;
-    use x86_64::instructions::interrupts;
-
-    interrupts::without_interrupts(|| {
-        WRITER.lock().write_fmt(args).unwrap();
-    });
 }
 
 #[test_case]

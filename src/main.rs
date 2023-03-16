@@ -8,11 +8,20 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use qmos::{print, println};
+
+use bootloader::{BootInfo, entry_point};
+use x86_64::structures::paging::Translate;
+
+use qmos::{memory, print, println};
+use qmos::memory::BootInfoFrameAllocator;
+
 mod panic;
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(_boot_info: &'static BootInfo) -> ! {
+    use x86_64::{structures::paging::Page, VirtAddr};
+
     println!("Welcome to QMOS!");
 
     qmos::init();
@@ -20,7 +29,7 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
-    println!("Booted");
+    println!("Booted successfully!");
     qmos::hlt_loop();
 }
 
