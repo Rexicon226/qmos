@@ -1,6 +1,8 @@
 use core::panic::PanicInfo;
 use crate::println;
+use qmos::{exit_qemu, QemuExitCode, serial_println};
 
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     if let Some(location) = info.location() {
@@ -15,4 +17,11 @@ fn panic(info: &PanicInfo) -> ! {
     }
 
     loop {}
+}
+
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    qmos::test_panic_handler(info)
 }
